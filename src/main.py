@@ -10,6 +10,9 @@ from w0eeebot import W0eeeBot
 logger = logging.getLogger('main')
 
 def main() -> int | None:
+    with open("w0eeebot.version", "r") as version_fp:
+        version = version_fp.readline().strip()
+
     required_envvars = {
         'DISCORD_BOT_TOKEN': 'Discord bot token',
         'BOT_DB_URL': 'Postgres URL to access bot database',
@@ -22,7 +25,7 @@ def main() -> int | None:
             logger.error(f"Must provide {description}.")
             return 1
 
-    bot = W0eeeBot(os.environ['BOT_DB_URL'], os.environ['ULS_DB_URL'])
+    bot = W0eeeBot(os.environ['BOT_DB_URL'], os.environ['ULS_DB_URL'], version)
     bot.run(os.environ['DISCORD_BOT_TOKEN'], root_logger=True)
     
 if __name__ == '__main__':
