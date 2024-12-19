@@ -25,7 +25,7 @@ def main() -> int | None:
             logger.error(f"Must provide {description}.")
             return 1
 
-    bot = W0eeeBot(os.environ['BOT_DB_URL'], os.environ['ULS_DB_URL'], version)
+    bot = W0eeeBot(os.environ['BOT_DB_URL'], os.environ['ULS_DB_URL'], os.environ.get("PRESENCE_LISTENINGTO"), version)
     bot.run(os.environ['DISCORD_BOT_TOKEN'], root_logger=True)
     
 if __name__ == '__main__':
