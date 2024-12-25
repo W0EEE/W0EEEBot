@@ -24,7 +24,47 @@ def tree() -> app_commands.Group:
         lic = await interaction.client.uls.license_by_callsign(callsign)
         
         if lic is None:
-            return await interaction.followup.send(f"No results found for `{callsign}`")
+            if interaction.client.qrz is None:
+                return await interaction.followup.send(f"No results found for `{callsign}`")
+            
+            qrz_lic = await interaction.client.qrz.lookup_callsign(callsign)
+            
+            if qrz_lic is None:
+                return await interaction.followup.send(f"No results found for `{callsign}`")
+            
+            if isinstance(qrz_lic, str):
+                return await interaction.followup.send(f"Error: `{qrz_lic}`")
+            
+            embed = discord.Embed()
+            embed.title = f"{qrz_lic['call'].replace('0', '\u00d8')}"
+            embed.description = '\n'.join(filter(None, [
+                qrz_lic.get('name_fmt'),
+                qrz_lic.get('attn'),
+                qrz_lic.get('addr1'),
+                qrz_lic.get('addr2'),
+                qrz_lic.get('state'),
+                qrz_lic.get('zip'),
+                qrz_lic.get('country')
+            ]))
+            embed.color = 0x7f7f7f
+            
+            if 'class' in qrz_lic:
+                embed.add_field(name='Operator Class:', value=qrz_lic['class'], inline=False)
+                
+            if 'aliases' in qrz_lic:
+                embed.add_field(name='AKA:', value=qrz_lic['aliases'], inline=False)
+
+            if 'serial' in qrz_lic:
+                embed.set_footer(text=f"QRZ Record #{qrz_lic['serial']}")
+            
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(
+                style=discord.ButtonStyle.link,
+                label="QRZ",
+                url=f"https://www.qrz.com/db/{qrz_lic['call']}"
+            ))
+            
+            return await interaction.followup.send(embed=embed, view=view)
         
         embed = discord.Embed()
         embed.title = f"{lic.callsign} ({lic.status} {lic.applicant_type})"

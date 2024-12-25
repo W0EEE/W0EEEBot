@@ -4,12 +4,13 @@ from discord import app_commands
 from commands import commands
 from db.uls import UlsClient
 import asyncpg as pg
+from db.qrz import QrzClient
 
 logger = logging.getLogger("W0EEEBot")
 
 class W0eeeBot(discord.Client):
     version: str
-    def __init__(self, bot_db_url: str, uls_db_url: str, listening_to: str | None, version: str):        
+    def __init__(self, bot_db_url: str, uls_db_url: str, listening_to: str | None, qrz_user: str | None, qrz_pass: str | None, version: str):        
         super().__init__(intents=discord.Intents.default())
         
         self.bot_db_url = bot_db_url
@@ -19,6 +20,11 @@ class W0eeeBot(discord.Client):
         
         root = app_commands.CommandTree(self)
         self.tree = root
+        
+        if qrz_user is not None and qrz_pass is not None:
+            self.qrz = QrzClient(qrz_user, qrz_pass, QrzClient.compose_agent("W0EEEBot", version))
+        else:
+            self.qrz = None
         
         @root.command()
         async def ping(interaction: discord.Interaction):
@@ -32,6 +38,9 @@ W0EEEBot {self.version} :)""")
     async def on_ready(self):
         self.uls = UlsClient(await pg.create_pool(self.uls_db_url))
         #self.botpool = await pg.create_pool(self.bot_db_url)
+        
+        if self.qrz is not None:
+            await self.qrz._renew_token()
         
         if self.listening_to is not None:
             activity = discord.Activity(name=self.listening_to)
