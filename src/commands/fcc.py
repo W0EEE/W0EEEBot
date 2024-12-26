@@ -36,7 +36,7 @@ def tree() -> app_commands.Group:
                 return await interaction.followup.send(f"Error: `{qrz_lic}`")
             
             embed = discord.Embed()
-            embed.title = f"{qrz_lic['call'].replace('0', '\u00d8')}"
+            embed.title = qrz_lic['call'].replace('0', '\u00d8')
             embed.description = '\n'.join(filter(None, [
                 qrz_lic.get('name_fmt'),
                 qrz_lic.get('attn'),
