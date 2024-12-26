@@ -46,7 +46,7 @@ def tree() -> app_commands.Group:
                 qrz_lic.get('zip'),
                 qrz_lic.get('country')
             ]))
-            embed.color = 0x7f7f7f
+            embed.color = 0x00007f
             
             if 'class' in qrz_lic:
                 embed.add_field(name='Operator Class:', value=qrz_lic['class'], inline=False)
